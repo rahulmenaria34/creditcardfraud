@@ -1,0 +1,138 @@
+base:
+  project: fraud-transaction-detection
+  random_state: 42
+  target_col: class
+
+config:
+  params: config/params.yaml
+  schema_prediction: config/schema_Prediction.json
+  schema_training: config/schema_Training.json
+
+reg_pattern_of_file:
+  training_file: ['Fraud_Data_']+['\_'']+[\d_]+[\d]+\.csv
+  additional_training_file: ['IPAddress_To_Country_']+['\_'']+[\d_]+[\d]+\.csv
+  prediction_file: ['Fraud_Data_']+['\_'']+[\d_]+[\d]+\.csv
+  additional_prediction_file: ['IPAddress_To_Country_']+['\_'']+[\d_]+[\d]+\.csv
+
+
+cloud_provider:
+  name: amazon
+
+data_download:
+  cloud_training_directory_path: data/training/training_batch_file/
+  cloud_prediction_directory_path: data/prediction/prediction_Batch_file
+
+additional_data_download:
+  cloud_additional_training_directory_path: data/training/additional_training_file
+  cloud_additional_prediction_directory_path: data/prediction/additional_prediction_file
+
+
+artifacts:
+  training_data:
+    training_db_dir: artifacts/training_data/Training_Database
+    good_validated_raw_dir: artifacts/training_data/Training_Raw_files_validated/Good_raw
+    good_validated_raw_dir_updated: artifacts/training_data/Training_Raw_files_validated/Good_raw_updated
+    bad_validated_raw_dir: artifacts/training_data/Training_Raw_files_validated/Bad_raw
+    TrainingArchiveBadData: artifacts/training_data/TrainingArchiveBadData
+    Training_FileFromDB: artifacts/training_data/Training_FileFromDB
+    training_db: Training.db
+    master_csv: master.csv
+    columnNames: artifacts/training_data/columnNames.txt
+    plots: artifacts/training_data/plots
+
+  models:
+    saved_best_models:
+      model_dir: artifacts/models
+      model_dir_kmeans: artifacts/models/kmeans
+      model_path_kmeans: artifacts/models/kmeans/kmeans.joblib
+
+  prediction_data:
+    prediction_db_dir: artifacts/prediction_data/Prediction_Database
+    good_validated_raw_dir: artifacts/prediction_data/Prediction_Raw_files_validated/Good_raw
+    good_validated_raw_dir_updated: artifacts/prediction_data/Prediction_Raw_files_validated/Good_raw_updated
+    bad_validated_raw_dir: artifacts/prediction_data/Prediction_Raw_files_validated/Bad_raw
+    PredictionArchiveBadData: artifacts/prediction_data/PredictionArchiveBadData
+    Prediction_FileFromDB: artifacts/prediction_data/Prediction_FileFromDB
+    prediction_db: Prediction.db
+    master_csv: master.csv
+    Prediction_Output_File: artifacts/Prediction_Output_DIR/Predictions.csv
+    Prediction_Output_DIR: artifacts/Prediction_Output_DIR
+
+
+  general: general
+  mlflow: artifacts/mlflow_artifacts
+
+data_source:
+  Training_Batch_Files: Training_Batch_Files
+  Prediction_Batch_Files: Prediction_Batch_Files
+
+additional_data_source:
+  additional_training_files: Additional_Training_File
+  additional_prediction_files: Additional_Prediction_File
+
+
+data_preprocessing:
+  preprocessed_data_dir: artifacts/training_data/preprocessed_data
+  pred_preprocessed_data_dir: artifacts/prediction_data/preprocessed_data
+  null_values_csv: null_values.csv
+  
+  KNNImputer: 
+    n_neighbors: 3 
+    weights: uniform
+    missing_values: nan
+
+  KMeansClustering:
+    init: k-means++
+    n_cluster_max: 11
+    KneeLocator: 
+      curve: convex
+      direction: decreasing
+
+log_database:
+  training_database_name: fraud_transcation_training_log
+  prediction_database_name: fraud_transcation_prediction_log
+
+
+mlflow_config:
+  registered_model_name_RF: random_forestModel
+  registered_model_name_XGB: xgboost_model
+  remote_server_uri: http://13.127.168.99:5002/
+
+training:
+  random_forest:
+    cv: 5
+    verbose: 3
+    param_grid:
+      n_estimators: 
+        - 10
+        - 50
+        - 100
+        - 130 
+      criterion: 
+        - gini
+        - entropy
+      max_depth: 
+        - 2
+        - 4
+      max_features: 
+        - auto
+        - log2
+  xg_boost:
+    cv: 5
+    verbose: 3
+    param_grid:
+      learning_rate: 
+        - 0.5
+        - 0.1
+        - 0.01
+        - 0.001
+      max_depth: 
+        - 3
+        - 5
+        - 10
+        - 20
+      n_estimators: 
+        - 10
+        - 50
+        - 100
+        - 200
