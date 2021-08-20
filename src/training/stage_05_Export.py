@@ -1,58 +1,59 @@
+from _typeshed import Self
 import os
-from wafer.utility import read_params, valuesFromSchemaFunction
+from src.utility import read_params, valuesFromSchemaFunction
+from webapp.data_access_layer.mongo_db.mongo_db_atlas import MongoDBOperation
 import argparse
+from src.utility import get_logger_object_of_training
 import sqlite3
 import csv
+
+log_collection_name="data_export"
 
 class Export:
     def __init__(self, config):
         self.config = config
         self.path = self.config["artifacts"]['training_data']["training_db_dir"]
-        self.DatabaseName = self.config["artifacts"]['training_data']["training_db"]
-        self.fileFromDb = self.config["artifacts"]['training_data']["Training_FileFromDB"]
+        self.database_name = self.config["artifacts"]['training_data']["training_db"]
+        self.collection_name = self.config["artifacts"]['training_data']["training_collection"]
+        self.additional_collection_name=self.config["artifacts"]['training_data']["training_additional_collection"]
+        self.file_from_db = self.config["artifacts"]['training_data']["Training_file_from_db"]
+        self.additional_file_From_db = self.config["artifacts"]['training_data']["Training_additional_file_drom_db"]
+        
         self.masterCSV = self.config["artifacts"]['training_data']["master_csv"]
+        self.additionalCSV=self.config["artifacts"]['training_data']["additional_csv"]
+        self.mongo_db=MongoDBOperation()
+       
+    
 
-    def dataBaseConnection(self):
+
+    def getDataFrameFromDataBase(self,logger,is_log_enable=True):
         try:
-            os.makedirs(self.path, exist_ok=True)
-            db_path = os.path.join(self.path, self.DatabaseName)
-            conn = sqlite3.connect(db_path)
-        except ConnectionError:
-            raise ConnectionError
-        return conn
-
-    def selectingDatafromtableintocsv(self):
-        try:
-            conn = self.dataBaseConnection()
-            sqlSelect = "SELECT *  FROM Good_Raw_Data"
-            cursor = conn.cursor()
-
-            cursor.execute(sqlSelect)
-
-            results = cursor.fetchall()
-            # Get the headers of the csv file
-            headers = [i[0] for i in cursor.description]
-
-            #Make the CSV ouput directory
-            os.makedirs(self.fileFromDb, exist_ok=True)
-
-            # Open CSV file for writing.
-            filePath = os.path.join(self.fileFromDb, self.masterCSV)
-            csvFile = csv.writer(open(filePath, 'w', newline=''),delimiter=',', lineterminator='\r\n',quoting=csv.QUOTE_ALL, escapechar='\\')
-
-            # Add the headers and data to the CSV file.
-            csvFile.writerow(headers)
-            csvFile.writerows(results)
+            logger.is_log_enable = is_log_enable
+            logger.log(f"Creating dataframe of data stored db[{self.database_name}] and collection[{self.collection_name}]")
+            df=self.mongo_db.get_dataframe_of_collection(db_name=self.database_name,collection_name=self.collection_name)
+            logger.log(f"CSV file has been generated at {os.path.join(self.file_from_db,self.masterCSV)}.")
+            df.to_csv(os.path.join(self.file_from_db,self.masterCSV))
+            logger.log(f"Creating dataframe of data stored db[{self.database_name}] and collection[{self.additional_collection_name}]")
+            df=self.mongo_db.get_dataframe_of_collection(db_name=self.database_name,collection_name=self.additional_collection_name)
+            df.to_csv(os.path.join(self.file_from_db,self.additionalCSV))
+            logger.log(f"Additional csv file has been generated at {os.path.join(self.file_from_db,self.additionalCSV)}.")
+            
 
         except Exception as e:
             raise e
 
+        
 
-def export_main(config_path: str) -> None:
+
+def export_main(config_path: str,is_logging_enable=True) -> None:
     try:
+        logger = get_logger_object_of_training(config_path=config_path, collection_name=log_collection_name)
+        logger.is_log_enable = is_logging_enable
         config = read_params(config_path)
         export = Export(config)
-        export.selectingDatafromtableintocsv()
+        logger.log("Generating csv file from data stored in database.")
+        export.getDataFrameFromDataBase(is_log_enable=True,logger=logger)
+        logger.log("Data has been successfully exported in directory and exiting export pipeline.")
     except Exception as e:
         raise e
 if __name__ == '__main__':

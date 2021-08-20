@@ -19,7 +19,7 @@ class File_Operation:
         self.config = config
         self.model_directory = self.config["artifacts"]["models"]["saved_best_models"]["model_dir"]
 
-    def save_model(self,model,cluster_num,fileName):
+    def save_model(self,model,fileName):
         """
             Method Name: save_model
             Description: Save the model file to directory
@@ -31,7 +31,7 @@ class File_Operation:
             Revisions: None
 """
         try:
-            path = os.path.join(self.model_directory,str(cluster_num)) #create seperate directory for each cluster
+            path = os.path.join(self.model_directory) #create seperate directory for each cluster
             if os.path.isdir(path): #remove previously existing models for each clusters
                 shutil.rmtree(path)
                 os.makedirs(path)

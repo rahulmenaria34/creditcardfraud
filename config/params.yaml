@@ -35,8 +35,12 @@ artifacts:
     bad_validated_raw_dir: artifacts/training_data/Training_Raw_files_validated/Bad_raw
     TrainingArchiveBadData: artifacts/training_data/TrainingArchiveBadData
     Training_FileFromDB: artifacts/training_data/Training_FileFromDB
-    training_db: Training.db
+    Training_AdditionalFileFromDB: artifacts/training_data/Training_AdditionalFileFromDB
+    training_db: fraud_trans_training_database
+    training_collection: fraud_transcation_training_dataset
+    training_additional_collection: fraud_transcation_additional_training_dataset
     master_csv: master.csv
+    additional_csv: additional.csv
     columnNames: artifacts/training_data/columnNames.txt
     plots: artifacts/training_data/plots
 

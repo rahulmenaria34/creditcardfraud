@@ -5,14 +5,15 @@ import shutil
 import yaml
 import json
 import subprocess
-from wafer.training.stage_00_Data_Loader import loader_main
-from wafer.training.stage_01_Data_validation import validattion_main
-from wafer.training.stage_02_Data_Transform import transform_main
-from wafer.training.stage_03_DB_Operation import db_operation_main
-from wafer.training.stage_04_Cleaning import cleaning_main
-from wafer.training.stage_05_Export import export_main
-from wafer.training.stage_06_train_model import train_main
+from src.training.stage_00_Data_Loader import loader_main
+from src.training.stage_01_Data_validation import validation_main
+from src.training.stage_02_Data_Transform import transform_main
+from src.training.stage_03_DB_Operation import db_operation_main
+from src.training.stage_04_Cleaning import cleaning_main
+from src.training.stage_05_Export import export_main
+from src.training.stage_06_train_model import train_main
 
+"""
 from wafer.prediction.stage_00_Data_Loader import pred_loader_main
 from wafer.prediction.stage_01_Data_validation import pred_validation_main
 from wafer.prediction.stage_03_DB_Operation import pred_db_operation_main
@@ -21,6 +22,7 @@ from wafer.prediction.stage_05_Export import pred_export_main
 from wafer.prediction.stage_02_Data_Transform import pred_transform_main
 from wafer.prediction.stage_06_prediction import prediction_main
 from webapp.logging_layer.logger.logger import AppLogger
+"""
 # import platform
 
 # def path_correction(path):
@@ -48,7 +50,7 @@ def begin_training():
         loader_main(config_path=parsed_args['config'], datasource=parsed_args['datasource'])
         logger.log("Data loading completed..")
         logger.log("Data validation began..")
-        validattion_main(config_path=parsed_args['config'], datasource=parsed_args['datasource'])
+        validation_main(config_path=parsed_args['config'], datasource=parsed_args['datasource'])
         logger.log("Data validation completed..")
         logger.log("Data transformation began..")
         transform_main(config_path=parsed_args['config'], datasource=parsed_args['datasource'])
